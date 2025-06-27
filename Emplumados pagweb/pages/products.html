@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tienda de Ropa Oversize</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Remix Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/3.5.0/remixicon.css" rel="stylesheet">
+    <style>
+        .product-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-cart {
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <!-- Header con botón del carrito -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <button type="button" class="btn btn-outline-secondary">
+                <a href="../index.html">Home</a></button>
+            <button type="button" class="btn btn-outline-secondary btn-cart" data-bs-toggle="modal" data-bs-target="#carritoModal">
+                <i class="bi bi-bag"></i>
+                <span class="cart-count" id="cartCount" style="display: none;">0</span>
+            </button>
+        </div>
+
+        <!-- Sección de Productos -->
+        <section id="products">
+            <h3 class="mb-4">Productos</h3>
+            <div class="row" id="productContainer">
+                <!-- Los productos se cargarán dinámicamente aquí -->
+            </div>
+        </section>
+
+        <!-- Modal del Carrito -->
+        <div class="modal fade" id="carritoModal" tabindex="-1" aria-labelledby="carritoModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <!-- Header del Modal -->
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="carritoModalLabel">
+                            <i class="bi bi-bag me-2"></i>Carrito de Compras
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    
+                    <!-- Cuerpo del Modal -->
+                    <div class="modal-body">
+                        <div id="cartEmpty" class="text-center py-5">
+                            <i class="bi bi-bag-x display-1 text-muted"></i>
+                            <h5 class="mt-3">Tu carrito está vacío</h5>
+                            <p class="text-muted">Añade algunos productos para comenzar</p>
+                        </div>
+                        
+                        <div id="cartItems" style="display: none;">
+                            <h6 class="fw-bold mb-3">Productos en tu carrito:</h6>
+                            <div class="list-group mb-3" id="cartList">
+                                <!-- Los productos del carrito se mostrarán aquí -->
+                            </div>
+                            
+                            <!-- Resumen de totales -->
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <span>Subtotal:</span>
+                                        <span id="subtotal">$0.00</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <span>Envío:</span>
+                                        <span>$5.00</span>
+                                    </div>
+                                    <hr>
+                                    <div class="d-flex justify-content-between fw-bold">
+                                        <span>Total:</span>
+                                        <span id="total">$5.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Footer del Modal -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle me-1"></i>Cerrar
+                        </button>
+                        <button type="button" class="btn btn-success" id="checkoutBtn" style="display: none;">
+                            <i class="bi bi-credit-card me-1"></i>Proceder al Pago
+                        </button>
+                        <button type="button" class="btn btn-outline-danger" id="clearCartBtn" style="display: none;">
+                            <i class="bi bi-trash me-1"></i>Vaciar Carrito
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- JavaScript personalizado -->
+    <script>
+        // Datos JSON de productos
+        const productData = [
+            {
+                id: 1,
+                name: "Hoodie Oversize Urban",
+                collection: "Street Collection",
+                category: "hoodie",
+                price: 45.99,
+                image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=400&fit=crop"
+            },
+            {
+                id: 2,
+                name: "Camiseta Oversize Vintage",
+                collection: "Retro Vibes",
+                category: "camiseta oversize",
+                price: 25.99,
+                image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop"
+            },
+            {
+                id: 3,
+                name: "Sudadera Oversize Minimal",
+                collection: "Minimalist",
+                category: "sudadera",
+                price: 39.99,
+                image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop"
+            },
+            {
+                id: 4,
+                name: "Hoodie Oversize Grunge",
+                collection: "Dark Collection",
+                category: "hoodie",
+                price: 49.99,
+                image: "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=400&h=400&fit=crop"
+            },
+            {
+                id: 5,
+                name: "Camiseta Oversize Graphic",
+                collection: "Art Series",
+                category: "camiseta oversize",
+                price: 29.99,
+                image: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=400&h=400&fit=crop"
+            },
+            {
+                id: 6,
+                name: "Hoodie Oversize Pastel",
+                collection: "Soft Palette",
+                category: "hoodie",
+                price: 42.99,
+                image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=400&fit=crop&sat=-20&hue=30"
+            },
+            {
+                id: 7,
+                name: "Camiseta Oversize Básica",
+                collection: "Essentials",
+                category: "camiseta oversize",
+                price: 19.99,
+                image: "https://images.unsplash.com/photo-1562157873-818bc0726f68?w=400&h=400&fit=crop"
+            },
+            {
+                id: 8,
+                name: "Sudadera Oversize Tie-Dye",
+                collection: "Colorful Dreams",
+                category: "sudadera",
+                price: 35.99,
+                image: "https://images.unsplash.com/photo-1603217192634-61edf4b3b71b?w=400&h=400&fit=crop"
+            },
+            {
+                id: 9,
+                name: "Hoodie Oversize Tech",
+                collection: "Future Wear",
+                category: "hoodie",
+                price: 54.99,
+                image: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=400&h=400&fit=crop"
+            },
+            {
+                id: 10,
+                name: "Camiseta Oversize Neon",
+                collection: "Electric Nights",
+                category: "camiseta oversize",
+                price: 32.99,
+                image: "https://images.unsplash.com/photo-1571455786673-9d9d6c194f90?w=400&h=400&fit=crop"
+            },
+            {
+                id: 11,
+                name: "Hoodie Oversize Gradient",
+                collection: "Sunset Series",
+                category: "hoodie",
+                price: 47.99,
+                image: "https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?w=400&h=400&fit=crop"
+            },
+            {
+                id: 12,
+                name: "Camiseta Oversize Pocket",
+                collection: "Casual Comfort",
+                category: "camiseta oversize",
+                price: 24.99,
+                image: "https://images.unsplash.com/photo-1583743814966-8936f37f4bbb?w=400&h=400&fit=crop"
+            },
+            {
+                id: 13,
+                name: "Sudadera Oversize Cream",
+                collection: "Neutral Tones",
+                category: "sudadera",
+                price: 41.99,
+                image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop&sat=-30"
+            },
+            {
+                id: 14,
+                name: "Hoodie Oversize Varsity",
+                collection: "College Style",
+                category: "hoodie",
+                price: 52.99,
+                image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=400&fit=crop&hue=120"
+            },
+            {
+                id: 15,
+                name: "Camiseta Oversize Striped",
+                collection: "Classic Patterns",
+                category: "camiseta oversize",
+                price: 27.99,
+                image: "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=400&h=400&fit=crop&sat=-40"
+            },
+            {
+                id: 16,
+                name: "Hoodie Oversize Corduroy",
+                collection: "Texture Play",
+                category: "hoodie",
+                price: 58.99,
+                image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop&hue=60"
+            },
+            {
+                id: 17,
+                name: "Camiseta Oversize Acid Wash",
+                collection: "Vintage Revival",
+                category: "camiseta oversize",
+                price: 33.99,
+                image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop&sat=20"
+            },
+            {
+                id: 18,
+                name: "Sudadera Oversize Fleece",
+                collection: "Cozy Comfort",
+                category: "sudadera",
+                price: 44.99,
+                image: "https://images.unsplash.com/photo-1603217192634-61edf4b3b71b?w=400&h=400&fit=crop&sat=-20"
+            },
+            {
+                id: 19,
+                name: "Hoodie Oversize Embroidered",
+                collection: "Artisan Craft",
+                category: "hoodie",
+                price: 61.99,
+                image: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=400&h=400&fit=crop&hue=180"
+            },
+            {
+                id: 20,
+                name: "Camiseta Oversize Metallic",
+                collection: "Futuristic Edge",
+                category: "camiseta oversize",
+                price: 36.99,
+                image: "https://images.unsplash.com/photo-1571455786673-9d9d6c194f90?w=400&h=400&fit=crop&sat=40"
+            }
+        ];
+
+        // Carrito de compras
+        let cart = [];
+
+        // Función para renderizar productos
+        function renderProducts() {
+            const container = document.getElementById('productContainer');
+            container.innerHTML = '';
+
+            productData.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'col-md-6 col-lg-4 col-xl-3 mb-4';
+                productCard.innerHTML = `
+                    <div class="card product-card h-100" style="width: 100%;">
+                        <img src="${product.image}" class="card-img-top" alt="${product.name}" style="height: 250px; object-fit: cover;">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">${product.name}</h5>
+                            <h6 class="card-subtitle mb-2 text-body-secondary">${product.collection}</h6>
+                            <span class="mb-3 text-muted small">${product.category}</span>
+                            <div class="mt-auto">
+                                <input type="checkbox" class="btn-check" id="btncheck${product.id}" autocomplete="off">
+                                <label class="btn btn-outline-primary w-100" for="btncheck${product.id}">
+                                    <i class="ri-money-cny-box-fill me-1"></i>$${product.price}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(productCard);
+
+                // Agregar event listener para el checkbox
+                const checkbox = document.getElementById(`btncheck${product.id}`);
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        addToCart(product);
+                    } else {
+                        removeFromCart(product.id);
+                    }
+                });
+            });
+        }
+
+        // Función para añadir al carrito
+        function addToCart(product) {
+            const existingItem = cart.find(item => item.id === product.id);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({...product, quantity: 1});
+            }
+            updateCartDisplay();
+        }
+
+        // Función para quitar del carrito
+        function removeFromCart(productId) {
+            cart = cart.filter(item => item.id !== productId);
+            updateCartDisplay();
+        }
+
+        // Función para actualizar la visualización del carrito
+        function updateCartDisplay() {
+            const cartCount = document.getElementById('cartCount');
+            const cartEmpty = document.getElementById('cartEmpty');
+            const cartItems = document.getElementById('cartItems');
+            const cartList = document.getElementById('cartList');
+            const subtotalElement = document.getElementById('subtotal');
+            const totalElement = document.getElementById('total');
+            const checkoutBtn = document.getElementById('checkoutBtn');
+            const clearCartBtn = document.getElementById('clearCartBtn');
+
+            // Actualizar contador del carrito
+            const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
+            if (totalItems > 0) {
+                cartCount.style.display = 'flex';
+                cartCount.textContent = totalItems;
+            } else {
+                cartCount.style.display = 'none';
+            }
+
+            // Mostrar/ocultar secciones del modal
+            if (cart.length === 0) {
+                cartEmpty.style.display = 'block';
+                cartItems.style.display = 'none';
+                checkoutBtn.style.display = 'none';
+                clearCartBtn.style.display = 'none';
+            } else {
+                cartEmpty.style.display = 'none';
+                cartItems.style.display = 'block';
+                checkoutBtn.style.display = 'inline-block';
+                clearCartBtn.style.display = 'inline-block';
+            }
+
+            // Actualizar lista de productos en el carrito
+            cartList.innerHTML = '';
+            let subtotal = 0;
+
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                subtotal += itemTotal;
+
+                const cartItem = document.createElement('div');
+                cartItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+                cartItem.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <img src="${item.image}" alt="${item.name}" style="width: 50px; height: 50px; object-fit: cover; margin-right: 15px; border-radius: 5px;">
+                        <div>
+                            <h6 class="mb-1">${item.name}</h6>
+                            <p class="mb-1 text-muted small">${item.collection}</p>
+                            <small class="text-muted">Cantidad: ${item.quantity}</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-primary rounded-pill me-2">$${itemTotal.toFixed(2)}</span>
+                        <button class="btn btn-sm btn-outline-danger" onclick="removeFromCart(${item.id})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                `;
+                cartList.appendChild(cartItem);
+            });
+
+            // Actualizar totales
+            const shipping = 5.00;
+            const total = subtotal + shipping;
+            subtotalElement.textContent = `$${subtotal.toFixed(2)}`;
+            totalElement.textContent = `$${total.toFixed(2)}`;
+
+            // Actualizar checkboxes
+            productData.forEach(product => {
+                const checkbox = document.getElementById(`btncheck${product.id}`);
+                if (checkbox) {
+                    checkbox.checked = cart.some(item => item.id === product.id);
+                }
+            });
+        }
+
+        // Función para vaciar el carrito
+        function clearCart() {
+            if (confirm('¿Estás seguro de que quieres vaciar el carrito?')) {
+                cart = [];
+                updateCartDisplay();
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            renderProducts();
+
+            // Botón de proceder al pago
+            document.getElementById('checkoutBtn').addEventListener('click', function() {
+                alert('Redirigiendo al proceso de pago...');
+            });
+            
+            // Botón de vaciar carrito
+            document.getElementById('clearCartBtn').addEventListener('click', clearCart);
+            
+            // Evento cuando se abre el modal
+            document.getElementById('carritoModal').addEventListener('show.bs.modal', function (event) {
+                console.log('Modal del carrito abierto');
+            });
+        });
+    </script>
+</body>
+</html>
